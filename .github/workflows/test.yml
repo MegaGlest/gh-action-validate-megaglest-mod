@@ -25,9 +25,9 @@ jobs:
     # - run: rm -rf /output/*
     # - name: clone MG Data
     #   run: git clone --depth 1 <mg data repo> or curl mg data last release archive
+    - uses: actions/checkout@v3
     - name: clone MG Data
       run: git clone --depth 1 https://github.com/zetaglest/readypack-testing test
-    - uses: actions/checkout@v3
     - name: Use action from self
       uses: ./
       with:

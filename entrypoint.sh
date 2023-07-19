@@ -8,6 +8,7 @@ fi
 # show some variables
 export -p
 
+ls
 ls $INPUT_DIRECTORY
 echo separator
 ls .

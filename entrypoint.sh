@@ -5,6 +5,15 @@ if [ -z "$INPUT_DIRECTORY" ]; then
     INPUT_DIRECTORY="."
 fi
 
+# show some variables
+export -p
+
+ls $INPUT_DIRECTORY
+echo separator
+ls .
+echo separateor
+ls $GITHUB_WORKSPACE
+
 xvfb-run /usr/games/megaglest --validate-techtrees=$INPUT_DIRECTORY | sed -e/======\ Started\ Validation\ ======/\{ -e:1 -en\;b1 -e\} -ed > results.txt
 
 ret=0

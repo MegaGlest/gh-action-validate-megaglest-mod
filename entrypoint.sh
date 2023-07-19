@@ -8,6 +8,7 @@ fi
 xvfb-run /usr/games/megaglest --validate-techtrees=$INPUT_DIRECTORY | sed -e/======\ Started\ Validation\ ======/\{ -e:1 -en\;b1 -e\} -ed > results.txt
 
 ret=0
+cat results.txt
 grep -i error results.txt || exit 0
 # if [ INPUT_FAIL_ON_WARNING = true ] then
 exit 1

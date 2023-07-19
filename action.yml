@@ -1,0 +1,27 @@
+name: 'Validate an MG mod'
+description: 'Validate an MG mod'
+inputs:
+  name:
+    description: "name of the mod"
+    required: true
+    default: ''
+  version:
+    description: "mod version"
+    required: true
+    default: ''
+  remove_from_mod:
+    description: "list of files or directories to remove, each separated by a space"
+    required: false
+    default: ''
+  fail_on_warning:
+    description: "Fail if no errors present, but warnings are indicated"
+    required: false
+    default: 'false'
+
+runs:
+  using: docker
+  image: Dockerfile
+
+branding:
+  icon: package
+  color: gray-dark

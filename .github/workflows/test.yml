@@ -25,10 +25,12 @@ jobs:
     # - run: rm -rf /output/*
     # - name: clone MG Data
     #   run: git clone --depth 1 <mg data repo> or curl mg data last release archive
+    - name: clone MG Data
+      run: git clone --depth 1 https://github.com/zetaglest/readypack-testing test
     - uses: actions/checkout@v3
     - name: Use action from self
       uses: ./
       with:
         name: ${{ env.MOD_NAME }}
         version: ${{ env.MOD_VERSION }}
-        directory: 'test/${{ env.MOD_NAME }}'
+        directory: 'test'

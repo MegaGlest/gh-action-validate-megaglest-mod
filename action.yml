@@ -10,13 +10,13 @@ inputs:
     required: true
     default: ''
   directory:
-    description: "relative path to the directory containing the mod xml"
+    description: "relative path to the directory containing the top-level mod xml file"
     required: false
     default: '.'
   type:
     description: "tech, scenario, or tileset"
     required: true
-    default: ''
+    default: tech
   remove_from_mod:
     description: "list of files or directories to remove, each separated by a space"
     required: false

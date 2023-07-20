@@ -8,9 +8,9 @@ specify the relative path.
 
 The example shown below has two separate jobs:
 
-1. When there is a push to the default branch, or when a pull request
-is opened or updated, the pyromod is built and is uploaded to the
-workflow output page.
+1. When there is a push to the default branch, or when a pull request is
+opened or updated, the mod is built and is uploaded to the workflow output
+page.
 
 2. When a new a new tag is created (if the tag starts with a 'v'), the
 built mod will get uploaded to the release page, along with a
@@ -41,10 +41,10 @@ on:
       - main
 
 env:
-  MOD_NAME: <your-mod>
+  MOD_NAME: <mod-name>
 
 jobs:
-  build-pyromod:
+  validate-and-build-mod:
     if: ${{ github.ref_type != 'tag' }}
     runs-on: ubuntu-latest
     env:
@@ -55,7 +55,7 @@ jobs:
       with:
         name: ${{ env.MOD_NAME }}
         version: ${{ env.MOD_VERSION }}
-      id: build-mod
+        type: tech
     - name: Upload Artifacts
       # Uploads artifacts (combined into a zip file) to the workflow output page
       uses: actions/upload-artifact@v3
@@ -100,21 +100,21 @@ jobs:
 |----------|--------|-------------|--------|
 | name | true | | |
 | version | true | | |
-| directory | false | relative path to your mod.json file | '.' |
-| remove_from_pyromod | false | list of files or directories to remove, each separated by a space (wildcards ok) | |
+| type | true | specify 'tech', 'scenario', or 'tileset' | tech |
+| directory | false | relative path to the directory containing the top-level mod xml file | '.' |
+| remove_from_mod | false | list of files or directories to remove, each separated by a space (wildcards ok) | |
+| fail_on_warning | false | Fail if no errors present, but warnings are indicated | no |
 
-Note that this action will remove '.git*' from the pyromod by default
-and doesn't need to be added to the 'remove_from_pyromod' string.
+Note that this action will remove '.git*' from the mod by default
+and doesn't need to be added to the 'remove_from_mod' string.
 
-remove_from_pyromod example:
+remove_from_mod example:
 
-    remove_from_pyromod: 'foo bar /package.json /.*'
+    remove_from_mod: 'foo bar /package.json /.*'
 
 ## Additional Notes
 
 Option table
 
-The docker image used by this action is published from
-[0ad-matters/0ad-bin-nodata](https://github.com/0ad-matters/0ad-bin-nodata)
-and pulled from
-[andy5995/0ad-bin-nodata](https://hub.docker.com/repository/docker/andy5995/0ad-bin-nodata).
+The docker image used by this action is pulled from
+[jammyjamjamman/megaglest-no-data](https://hub.docker.com/repository/docker/jammyjamjamman/megaglest-no-data).

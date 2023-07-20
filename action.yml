@@ -13,6 +13,10 @@ inputs:
     description: "relative path to the directory containing the mod xml"
     required: false
     default: '.'
+  type:
+    description: "tech, scenario, or tileset"
+    required: true
+    default: ''
   remove_from_mod:
     description: "list of files or directories to remove, each separated by a space"
     required: false
@@ -20,7 +24,7 @@ inputs:
   fail_on_warning:
     description: "Fail if no errors present, but warnings are indicated"
     required: false
-    default: 'false'
+    default: 'no'
 
 runs:
   using: docker

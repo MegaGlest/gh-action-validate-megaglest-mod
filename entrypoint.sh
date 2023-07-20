@@ -53,18 +53,15 @@ fi
 
 rm results.txt
 
-OUTPUT_DIR=/github/workspace/output
-mkdir -m 777 -p $OUTPUT_DIR
+OUTPUT_DIR="$GITHUB_WORKSPACE/output"
+mkdir -m 777 -p "$OUTPUT_DIR"
 OUTPUT_FILE="$OUTPUT_DIR/$INPUT_NAME-$INPUT_VERSION.7z"
-
-# validate
-# build 7z
-
-zip -d "$OUTPUT_FILE" ".git*"
+7z a "$OUTPUT_FILE" "$mg_sub"
+7z d "$OUTPUT_FILE" "$INPUT_NAME/.git"*
 
 for item in $INPUT_REMOVE_FROM_MOD; do
   if [ -z "${item##*.git*}" ]; then
     continue
   fi
-  zip -d "$OUTPUT_FILE" "$item"
+  7z d "$OUTPUT_FILE" "$item"
 done

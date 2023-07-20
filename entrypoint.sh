@@ -41,21 +41,17 @@ echo $mg_sub
 mkdir -p "$mg_sub"
 mv "$INPUT_DIRECTORY/"* "$mg_sub"
 
-HOME="$FAKE_HOME" xvfb-run /usr/games/megaglest --validate-"$validate_substr"="$INPUT_NAME"
-# | sed -e/======\ Started\ Validation\ ======/\{ -e:1 -en\;b1 -e\} -ed > results.txt
+HOME="$FAKE_HOME" xvfb-run /usr/games/megaglest --validate-"$validate_substr"="$INPUT_NAME" | sed -e/======\ Started\ Validation\ ======/\{ -e:1 -en\;b1 -e\} -ed > results.txt
 
-ret=0
-#cat results.txt
-grep -i error results.txt && exit 1
-# if [ INPUT_FAIL_ON_WARNING = true ] then
-exit 0
-# fi
-if [ $ret eq 1]; then
-  #if fail_on_warning = true
-  # grep check for warning
-  # if warning found, exit 1 else exit 0
+cat results.txt
+grep -i 'NO ERRORS' results.txt || exit 1
+
+# The commas used for expansion indicate to change all characters to lowercase
+if [ "${INPUT_FAIL_ON_WARNING,,}" = "yes" ]; then
+  grep -i warning results.txt && exit 1
 fi
-exit 0
+
+rm results.txt
 
 OUTPUT_DIR=/github/workspace/output
 mkdir -m 777 -p $OUTPUT_DIR

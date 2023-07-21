@@ -9,30 +9,18 @@ on:
       - trunk
 
 jobs:
-  test-megaglest-data:
+  test-megaglest-mod:
     runs-on: ubuntu-latest
     env:
       TEST_MOD_NAME: 'readypack-testing'
-      TEST_MOD_VERSION: ${{ github.sha }}
     steps:
-    # # - name: clone MegaGlest data repo
-    # #   run: cd test && git clone --depth 1 https://github.com/megaglest/megaglest-data
-    # - uses: megaglest/gh-action-validate-megaglest-mod@v1 # test from last release
-    #   with:
-    #     name: ${{ env.MOD_NAME }}
-    #     version: ${{ env.MOD_VERSION }}
-    #     directory: 'test/${{ env.MOD_NAME }}'
-    # - run: rm -rf /output/*
-    # - name: clone MG Data
-    #   run: git clone --depth 1 <mg data repo> or curl mg data last release archive
     - uses: actions/checkout@v3
-    - name: clone MG Data
+    - name: clone mod
       run: git clone --depth 1 https://github.com/zetaglest/${{ env.TEST_MOD_NAME }} test
     - name: Use action from self
       uses: ./
       with:
         name: ${{ env.TEST_MOD_NAME }}
-        version: ${{ env.TEST_MOD_VERSION }}
         directory: test
         type: tech
         fail_on_warning: no

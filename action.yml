@@ -5,9 +5,9 @@ inputs:
     description: "name of the mod"
     required: true
     default: ''
-  version:
-    description: "mod version"
-    required: true
+  release_name:
+    description: "Specify if the name of your mod is different for releases"
+    required: false
     default: ''
   directory:
     description: "relative path to the directory containing the top-level mod xml file"
@@ -17,10 +17,6 @@ inputs:
     description: "tech, scenario, or tileset"
     required: true
     default: tech
-  remove_from_mod:
-    description: "list of files or directories to remove, each separated by a space"
-    required: false
-    default: ''
   fail_on_warning:
     description: "Fail if no errors present, but warnings are indicated"
     required: false

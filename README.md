@@ -1,13 +1,13 @@
-# GitHub Action to validate and build a [MegaGlest](https://megaglest.org/) mod
+[![Test Action](https://github.com/MegaGlest/gh-action-validate-megaglest-mod/actions/workflows/test.yml/badge.svg)](https://github.com/MegaGlest/gh-action-validate-megaglest-mod/actions/workflows/test.yml)
 
-This action and the documentation isn't yet complete. We expect it to be
-finished and have a release very soon.
+# gh-action-validate-megaglest-mod
+
+GitHub Action to validate and build a [MegaGlest](https://megaglest.org/) mod
 
 ## Usage
 
 If your mod is not in the root directory of your repository, you can
-add the 'directory' argument (see option table below) after 'with:' to
-specify the relative path.
+add the 'directory' argument (see options below).
 
 The example shown below has two separate jobs:
 
@@ -45,6 +45,7 @@ on:
 
 env:
   MOD_NAME: <mod-name>
+  RELEASE_NAME: <release-name>
 
 jobs:
   validate-and-build-mod:
@@ -57,14 +58,18 @@ jobs:
     - uses: megaglest/gh-action-validate-megaglest-mod@v1
       with:
         name: ${{ env.MOD_NAME }}
-        version: ${{ env.MOD_VERSION }}
         type: tech
+    - name: Make 7z
+      run: |
+        cd output
+        7z a $MOD_NAME.7z $MOD_NAME
+
     - name: Upload Artifacts
       # Uploads artifacts (combined into a zip file) to the workflow output page
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.MOD_NAME }}-${{ env.MOD_VERSION }}
-        path: "output/${{ env.MOD_NAME }}*.*"
+        path: "output/${{ env.MOD_NAME }}*.7z"
 
   release-mod:
     if: ${{ github.ref_type == 'tag' }}
@@ -79,11 +84,19 @@ jobs:
     - uses:  megaglest/gh-action-validate-megaglest-mod@v1
       with:
         name: ${{ env.MOD_NAME }}
-        version: ${{ env.MOD_VERSION }}
-      id: build-mod
+        release_name: ${{ env.RELEASE_NAME }}
+        type: tech
+    - name: Make 7z
+      run: |
+        cd output/$RELEASE_NAME
+        sudo mv $RELEASE_NAME.xml $RELEASE_NAME-$MOD_VERSION.xml
+        cd ..
+        sudo mv $RELEASE_NAME $RELEASE_NAME-$MOD_VERSION
+        7z a $RELEASE_NAME-$MOD_VERSION.7z $RELEASE_NAME-$MOD_VERSION
+        sudo rm -rf $RELEASE_NAME-$MOD_VERSION
     - name: Create sha256sum
       run:  |
-        OUTPUT_FILE="$MOD_NAME-$MOD_VERSION.7z"
+        OUTPUT_FILE="$RELEASE_NAME-$MOD_VERSION.7z"
         cd output
         sha256sum $OUTPUT_FILE > $OUTPUT_FILE.sha256sum
     - name: Release Mod
@@ -91,33 +104,42 @@ jobs:
       with:
         allowUpdates: True
         prerelease: False
-        artifacts: "output/${{ env.MOD_NAME }}*.*"
+        artifacts: "output/${{ env.RELEASE_NAME }}*.*"
         token: ${{ secrets.GITHUB_TOKEN }}
         omitNameDuringUpdate: True
         omitBodyDuringUpdate: True
 ```
 
-## Option table
+## Options
 
-| name | required | description | default |
-|----------|--------|-------------|--------|
-| name | true | | |
-| version | true | | |
-| type | true | specify 'tech', 'scenario', or 'tileset' | tech |
-| directory | false | relative path to the directory containing the top-level mod xml file | '.' |
-| remove_from_mod | false | list of files or directories to remove, each separated by a space (wildcards ok) | |
-| fail_on_warning | false | Fail if no errors present, but warnings are indicated | no |
-
-Note that this action will remove '.git*' from the mod by default
-and doesn't need to be added to the 'remove_from_mod' string.
-
-remove_from_mod example:
-
-    remove_from_mod: 'foo bar /package.json /.*'
+```yaml
+inputs:
+  name:
+    description: "name of the mod"
+    required: true
+    default: ''
+  release_name:
+    description: "Specify if the name of your mod is different for releases"
+    required: false
+    default: ''
+  directory:
+    description: "relative path to the directory containing the top-level mod xml file"
+    required: false
+    default: '.'
+  type:
+    description: "tech, scenario, or tileset"
+    required: true
+    default: tech
+  fail_on_warning:
+    description: "Fail if no errors present, but warnings are indicated"
+    required: false
+    default: 'no'
+```
 
 ## Additional Notes
 
-Option table
+If your mod resides in a repository and the main xml has something like 'dev'
+or 'testing' in the filename, you can use `release_name` to strip that away.
 
 The docker image used by this action is pulled from
 [jammyjamjamman/megaglest-no-data](https://hub.docker.com/repository/docker/jammyjamjamman/megaglest-no-data).

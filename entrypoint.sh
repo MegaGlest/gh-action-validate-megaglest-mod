@@ -7,6 +7,9 @@ set -ev
 #fi
 
 test -f "$INPUT_DIRECTORY/$INPUT_NAME.xml"
+WORK_DIR="$GITHUB_WORKSPACE/../$INPUT_NAME"
+mkdir -p "$WORK_DIR"
+mv "$INPUT_DIRECTORY"/* "$WORK_DIR"
 
 # show some variables
 export -p
@@ -15,7 +18,7 @@ type=(tech scenario tileset)
 subdir=(${type[0]}s ${type[1]}s ${type[2]}s)
 validate_type=(techtrees ${type[1]} ${type[2]})
 
-FAKE_HOME="/fake_home"
+FAKE_HOME="./fake_home"
 
 mg_sub=""
 validate_substr=""
@@ -36,10 +39,9 @@ if [ -z "$mg_sub" ]; then
   exit 1
 fi
 
-mg_sub="$mg_sub/$INPUT_NAME"
 echo $mg_sub
 mkdir -p "$mg_sub"
-mv "$INPUT_DIRECTORY/"* "$mg_sub"
+mv "$WORK_DIR" "$mg_sub"
 
 HOME="$FAKE_HOME" xvfb-run /usr/games/megaglest --validate-"$validate_substr"="$INPUT_NAME" | sed -e/======\ Started\ Validation\ ======/\{ -e:1 -en\;b1 -e\} -ed > results.txt
 
@@ -51,17 +53,17 @@ if [ "${INPUT_FAIL_ON_WARNING,,}" = "yes" ]; then
   grep -i warning results.txt && exit 1
 fi
 
-rm results.txt
-
 OUTPUT_DIR="$GITHUB_WORKSPACE/output"
-mkdir -m 777 -p "$OUTPUT_DIR"
-OUTPUT_FILE="$OUTPUT_DIR/$INPUT_NAME-$INPUT_VERSION.7z"
-7z a "$OUTPUT_FILE" "$mg_sub"
-7z d "$OUTPUT_FILE" "$INPUT_NAME/.git"*
+# so changes can be made in the workflow outside the action
+mkdir -m 1777 -p "$OUTPUT_DIR"
 
-for item in $INPUT_REMOVE_FROM_MOD; do
-  if [ -z "${item##*.git*}" ]; then
-    continue
-  fi
-  7z d "$OUTPUT_FILE" "$item"
-done
+# move the mod folder to the output dir, which can then be processed
+# by a user in their workflow as desired
+mv "$mg_sub/$INPUT_NAME" "$OUTPUT_DIR"
+
+if [ -n "$INPUT_RELEASE_NAME" ]; then
+  cd "$OUTPUT_DIR/$INPUT_NAME"
+  mv "$INPUT_NAME.xml" "$INPUT_RELEASE_NAME.xml"
+  cd ..
+  mv "$INPUT_NAME" "$INPUT_RELEASE_NAME"
+fi

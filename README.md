@@ -1,5 +1,8 @@
 # GitHub Action to validate and build a [MegaGlest](https://megaglest.org/) mod
 
+This action and the documentation isn't yet complete. We expect it to be
+finished and have a release very soon.
+
 ## Usage
 
 If your mod is not in the root directory of your repository, you can

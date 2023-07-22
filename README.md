@@ -43,63 +43,40 @@ on:
     branches:
       - main
 
-env:
-  MOD_NAME: <mod-name>
-  RELEASE_NAME: <release-name>
-
 jobs:
-  validate-and-build-mod:
-    if: ${{ github.ref_type != 'tag' }}
+  validate-mod:
     runs-on: ubuntu-latest
     env:
-      MOD_VERSION: ${{ github.sha }}
+      MOD_NAME: <your-mod-name>
+      RELEASE_NAME: <your-mod-release-name>
     steps:
     - uses: actions/checkout@v3
-    - uses: megaglest/gh-action-validate-megaglest-mod@v1
-      with:
-        name: ${{ env.MOD_NAME }}
-        type: tech
-    - name: Make 7z
-      run: |
-        cd output
-        7z a $MOD_NAME.7z $MOD_NAME
 
-    - name: Upload Artifacts
-      # Uploads artifacts (combined into a zip file) to the workflow output page
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.MOD_NAME }}-${{ env.MOD_VERSION }}
-        path: "output/${{ env.MOD_NAME }}*.7z"
-
-  release-mod:
-    if: ${{ github.ref_type == 'tag' }}
-    runs-on: ubuntu-latest
-    env:
-      MOD_VERSION: ${{ github.ref_name }}
-    steps:
-    - uses: actions/checkout@v3
-    - name: Massage Variables
+    - if: ${{ github.ref_type == 'tag' }}
       run: |
+        MOD_VERSION=${{ github.ref_name }}
         echo "MOD_VERSION=${MOD_VERSION:1}" >> $GITHUB_ENV
-    - uses: megaglest/gh-action-validate-megaglest-mod@v1
+    - uses:  megaglest/gh-action-validate-megaglest-mod@v1
       with:
         name: ${{ env.MOD_NAME }}
         release_name: ${{ env.RELEASE_NAME }}
         type: tech
-    - name: Make 7z
+
+    - if: ${{ github.ref_type == 'tag' }}
+      name: Make 7z and sha256sum
       run: |
+        OUT_FILE="$RELEASE_NAME-$MOD_VERSION"
         cd output/$RELEASE_NAME
-        sudo mv $RELEASE_NAME.xml $RELEASE_NAME-$MOD_VERSION.xml
+        sudo mv $RELEASE_NAME.xml "$OUT_FILE".xml
         cd ..
-        sudo mv $RELEASE_NAME $RELEASE_NAME-$MOD_VERSION
-        7z a $RELEASE_NAME-$MOD_VERSION.7z $RELEASE_NAME-$MOD_VERSION
-        sudo rm -rf $RELEASE_NAME-$MOD_VERSION
-    - name: Create sha256sum
-      run:  |
-        OUTPUT_FILE="$RELEASE_NAME-$MOD_VERSION.7z"
+        sudo mv "$RELEASE_NAME" "$OUT_FILE"
+        7z a "$OUT_FILE.7z" "$OUT_FILE"
+        sudo rm -rf "$OUT_FILE"
         cd output
-        sha256sum $OUTPUT_FILE > $OUTPUT_FILE.sha256sum
-    - name: Release Mod
+        sha256sum "$OUT_FILE.7z" > "$OUT_FILE.7z.sha256sum"
+
+    - if: ${{ github.ref_type == 'tag' }}
+      name: Release Mod
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: True
@@ -144,31 +121,27 @@ The example below demonstrates how to code your yaml if your mod requires one
 or more techtrees as dependencies:
 
 ```yaml
-  test-megaglest-scenario:
-    runs-on: ubuntu-latest
-    env:
-      TEST_MOD_NAME: 'egypt_has_fallen'
+...
     steps:
-    - uses: actions/checkout@v3
-    - name: clone scenario
+    - uses: actions/checkout@v3 # clones your mod repo
+    - uses: actions/checkout@v3 # clones dependency
+      with:
+        clean: 'false'
+        repository: 'megaglest/megaglest-data'
+        path: 'megaglest-data'
+        sparse-checkout: 'techs/megapack'
+    - name: Get megapack
       run: |
-        git clone --depth 1 https://github.com/zetaglest/${{ env.TEST_MOD_NAME }} test
-        # get only the megapack techtree
-        git clone -n --depth=1 --filter=tree:0 https://github.com/megaglest/megaglest-data
-        cd megaglest-data
-        git sparse-checkout set --no-cone techs/megapack
-        git checkout
-        mv techs/megapack $GITHUB_WORKSPACE
+        mv megaglest-data/techs/megapack $GITHUB_WORKSPACE
         rm -rf $GITHUB_WORKSPACE/megaglest-data
         cd $GITHUB_WORKSPACE
-    - name: Run Validate Action
-      uses: megaglest/gh-action-validate-megaglest-mod@v1
+...
+    - uses: megaglest/gh-action-validate-megaglest-mod@v1
       with:
-        name: ${{ env.TEST_MOD_NAME }}
-        directory: test
+        name: ${{ env.MOD_NAME }}
         type: scenario
-        fail_on_warning: no
         dependencies: 'megapack'
+...
 ```
 
 ## Additional Notes

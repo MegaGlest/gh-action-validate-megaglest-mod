@@ -12,41 +12,47 @@ jobs:
   test-megaglest-techtree:
     runs-on: ubuntu-latest
     env:
-      TEST_MOD_NAME: 'readypack-testing'
+      TEST_MOD_NAME: 'megapack'
     steps:
-    - uses: actions/checkout@v3
-    - name: clone mod
-      run: git clone --depth 1 https://github.com/zetaglest/${{ env.TEST_MOD_NAME }} test
+    - uses: actions/checkout@v3 # clones this repo
+    - uses: actions/checkout@v3 # clones dependency
+      with:
+        clean: 'false'
+        repository: 'megaglest/megaglest-data'
+        path: 'megaglest-data'
+        sparse-checkout: 'techs/megapack'
     - name: Use action from self
       uses: ./
       with:
         name: ${{ env.TEST_MOD_NAME }}
-        directory: test
+        directory: megaglest-data/techs/megapack
         type: tech
         fail_on_warning: no
 
   test-megaglest-scenario:
     runs-on: ubuntu-latest
     env:
-      TEST_MOD_NAME: 'egypt_has_fallen'
+      TEST_MOD_NAME: 'amazones'
     steps:
+    - uses: actions/checkout@v3 # clones this repo
     - uses: actions/checkout@v3
-    - name: clone scenario
+      with:
+        clean: 'false'
+        repository: 'megaglest/megaglest-data'
+        path: megaglest-data
+        sparse-checkout: |
+          scenarios/amazones
+          techs/megapack
+    - name:
       run: |
-        git clone --depth 1 https://github.com/zetaglest/${{ env.TEST_MOD_NAME }} test
-        # get only the megapack techtree
-        git clone -n --depth=1 --filter=tree:0 https://github.com/megaglest/megaglest-data
-        cd megaglest-data
-        git sparse-checkout set --no-cone techs/megapack
-        git checkout
-        mv techs/megapack $GITHUB_WORKSPACE
-        rm -rf $GITHUB_WORKSPACE/megaglest-data
+        mv megaglest-data/techs/megapack $GITHUB_WORKSPACE
+        rm -rf $GITHUB_WORKSPACE/megaglest-data/techs
         cd $GITHUB_WORKSPACE
     - name: Use action from self
       uses: ./
       with:
         name: ${{ env.TEST_MOD_NAME }}
-        directory: test
+        directory: megaglest-data/scenarios/amazones
         type: scenario
         fail_on_warning: no
         dependencies: 'megapack'

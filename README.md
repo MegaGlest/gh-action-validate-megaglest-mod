@@ -6,18 +6,19 @@ GitHub Action to validate and build a [MegaGlest](https://megaglest.org/) mod
 
 ## Usage
 
-If your mod is not in the root directory of your repository, you can
-add the 'directory' argument (see options below).
+If your mod is not in the root directory of your repository, you can add the
+'directory' argument (see examples and options below).
 
-The example shown below has two separate jobs:
+The example shown below has two separate functions:
 
 1. When there is a push to the default branch, or when a pull request is
-opened or updated, the mod is built and is uploaded to the workflow output
-page.
+opened or updated, the mod is validated by running `megaglest
+--validate-<mod-type>=<yourmod>` in a [docker
+container](https://docs.docker.com/get-started/what-is-a-container/).
 
-2. When a new a new tag is created (if the tag starts with a 'v'), the
-built mod will get uploaded to the release page, along with a
-corresponding sha256sum.
+2. When creating a release from GitHub and a new tag is created (if the tag
+starts with a 'v'), the built mod will get uploaded to the release page, along
+with a corresponding sha256sum.
 
 This file needs to be placed in
 
@@ -117,8 +118,8 @@ inputs:
     default: 'no'
 ```
 
-The example below demonstrates how to code your yaml if your mod requires one
-or more techtrees as dependencies:
+The example below demonstrates how to code your yaml if your mod requires a
+techtree as a dependency:
 
 ```yaml
 ...
@@ -146,9 +147,14 @@ or more techtrees as dependencies:
 
 ## Additional Notes
 
-If you have more than one dependency, separate them with a space:
+If you have more than one dependency, separate them with a newline:
 
-     dependencies: 'megapack techtree2 techtree3'
+```yaml
+  dependencies: |
+    megapack
+    techtree2
+    techtree3
+```
 
 If your mod resides in a repository and the main xml has something like 'dev'
 or 'testing' in the filename, you can use `release_name` to strip that away.

@@ -8,8 +8,15 @@ set -ev
 
 test -f "$INPUT_DIRECTORY/$INPUT_NAME.xml"
 WORK_DIR="$GITHUB_WORKSPACE/../$INPUT_NAME"
-mkdir -p "$WORK_DIR"
-mv "$INPUT_DIRECTORY"/* "$WORK_DIR"
+MOD_TMP_DIR="$WORK_DIR/$INPUT_NAME"
+mkdir -p "$MOD_TMP_DIR"
+
+if [ -n "$INPUT_DEPENDENCIES" ]; then
+  for dep in ${INPUT_DEPENDENCIES}; do
+    mv "$dep" "$WORK_DIR"
+  done
+fi
+mv "$INPUT_DIRECTORY"/* "$MOD_TMP_DIR"
 
 # show some variables
 export -p
@@ -41,7 +48,13 @@ fi
 
 echo $mg_sub
 mkdir -p "$mg_sub"
-mv "$WORK_DIR" "$mg_sub"
+mv "$MOD_TMP_DIR" "$mg_sub"
+
+if [ -n "$INPUT_DEPENDENCIES" ]; then
+  for dep in ${INPUT_DEPENDENCIES}; do
+    mv "$WORK_DIR/$dep" "$FAKE_HOME/.megaglest/techs"
+  done
+fi
 
 HOME="$FAKE_HOME" xvfb-run /usr/games/megaglest --validate-"$validate_substr"="$INPUT_NAME" | sed -e/======\ Started\ Validation\ ======/\{ -e:1 -en\;b1 -e\} -ed > results.txt
 

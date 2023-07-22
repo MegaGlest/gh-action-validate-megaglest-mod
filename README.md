@@ -126,6 +126,10 @@ inputs:
     description: "relative path to the directory containing the top-level mod xml file"
     required: false
     default: '.'
+  dependencies:
+    description: "additional dependencies for your mod (i.e. other techtrees)"
+    required: false
+    default: ''
   type:
     description: "tech, scenario, or tileset"
     required: true

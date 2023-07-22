@@ -81,7 +81,7 @@ jobs:
     - name: Massage Variables
       run: |
         echo "MOD_VERSION=${MOD_VERSION:1}" >> $GITHUB_ENV
-    - uses:  megaglest/gh-action-validate-megaglest-mod@v1
+    - uses: megaglest/gh-action-validate-megaglest-mod@v1
       with:
         name: ${{ env.MOD_NAME }}
         release_name: ${{ env.RELEASE_NAME }}
@@ -140,7 +140,42 @@ inputs:
     default: 'no'
 ```
 
+The example below demonstrates how to code your yaml if your mod requires one
+or more techtrees as dependencies:
+
+```yaml
+  test-megaglest-scenario:
+    runs-on: ubuntu-latest
+    env:
+      TEST_MOD_NAME: 'egypt_has_fallen'
+    steps:
+    - uses: actions/checkout@v3
+    - name: clone scenario
+      run: |
+        git clone --depth 1 https://github.com/zetaglest/${{ env.TEST_MOD_NAME }} test
+        # get only the megapack techtree
+        git clone -n --depth=1 --filter=tree:0 https://github.com/megaglest/megaglest-data
+        cd megaglest-data
+        git sparse-checkout set --no-cone techs/megapack
+        git checkout
+        mv techs/megapack $GITHUB_WORKSPACE
+        rm -rf $GITHUB_WORKSPACE/megaglest-data
+        cd $GITHUB_WORKSPACE
+    - name: Run Validate Action
+      uses: megaglest/gh-action-validate-megaglest-mod@v1
+      with:
+        name: ${{ env.TEST_MOD_NAME }}
+        directory: test
+        type: scenario
+        fail_on_warning: no
+        dependencies: 'megapack'
+```
+
 ## Additional Notes
+
+If you have more than one dependency, separate them with a space:
+
+     dependencies: 'megapack techtree2 techtree3'
 
 If your mod resides in a repository and the main xml has something like 'dev'
 or 'testing' in the filename, you can use `release_name` to strip that away.

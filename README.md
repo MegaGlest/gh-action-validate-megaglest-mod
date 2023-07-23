@@ -73,7 +73,6 @@ jobs:
         sudo mv "$RELEASE_NAME" "$OUT_FILE"
         7z a "$OUT_FILE.7z" "$OUT_FILE"
         sudo rm -rf "$OUT_FILE"
-        cd output
         sha256sum "$OUT_FILE.7z" > "$OUT_FILE.7z.sha256sum"
 
     - if: ${{ github.ref_type == 'tag' }}

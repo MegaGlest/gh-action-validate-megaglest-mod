@@ -14,8 +14,8 @@ jobs:
     env:
       TEST_MOD_NAME: 'megapack'
     steps:
-    - uses: actions/checkout@v4 # clones this repo
-    - uses: actions/checkout@v4 # clones dependency
+    - uses: actions/checkout@v6 # clones this repo
+    - uses: actions/checkout@v6 # clones dependency
       with:
         clean: 'false'
         repository: 'megaglest/megaglest-data'
@@ -34,8 +34,8 @@ jobs:
     env:
       TEST_MOD_NAME: 'amazones'
     steps:
-    - uses: actions/checkout@v4 # clones this repo
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6 # clones this repo
+    - uses: actions/checkout@v6
       with:
         clean: 'false'
         repository: 'megaglest/megaglest-data'
